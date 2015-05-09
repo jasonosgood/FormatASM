@@ -1,4 +1,4 @@
-package asm;
+package formatasm;
 
 /**
  * Copyright 2015 Jason Aaron Osgood 
