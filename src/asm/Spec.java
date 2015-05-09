@@ -1,11 +1,21 @@
 package asm;
+
+
+/**
+ * Copyright 2015 Jason Aaron Osgood 
+ * 
+ * All rights reserved.
+ * 
+ * I'll pick a friendly open source license shortly. Probably BSD.
+ * 
+ **/
+
 class Spec 
 {
 	Spec() {}
 	
 	Spec( int begin, int end, String text )
 	{
-		System.out.printf( "%d %d %s\n", begin, end, text );
 		this.begin = begin;
 		this.end = end;
 		type = Type.CONTENT;

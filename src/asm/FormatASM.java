@@ -1,15 +1,21 @@
 package asm;
 
+/**
+ * Copyright 2015 Jason Aaron Osgood 
+ * 
+ * All rights reserved.
+ * 
+ * I'll pick a friendly open source license shortly. Probably BSD.
+ * 
+ **/
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -33,7 +39,7 @@ public abstract class FormatASM implements Opcodes
 				AccessClassLoader loader = AccessClassLoader.get( FormatASM.class );
 	
 				List<Spec> specs = parse( template, args );
-				byte[] data = dump( klazz, subklazz, specs );
+				byte[] data = generateBytes( klazz, subklazz, specs );
 				Class<FormatASM> accessClass = (Class<FormatASM>) loader.defineClass( subklazz, data );
 		
 				try
@@ -46,7 +52,7 @@ public abstract class FormatASM implements Opcodes
 				}
 				catch( Throwable t )
 				{
-					throw new RuntimeException( "Error constructing method access class: " + subklazz, t );
+					throw new RuntimeException( "Error constructing FormatASM subclass: " + subklazz, t );
 				}
 			}
 		}
@@ -59,9 +65,6 @@ public abstract class FormatASM implements Opcodes
 
 	
 	// https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholders
-	// %[parameter][flags][width][.precision][length]type
-	
-
 	// %[argument_index$][flags][width][.precision][t]conversion
 	private static final String	formatSpecifier	= "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?(([tT][aAbBcCdDeFhHIjklLmMnpQrsStyYZ])|([aAbBcCdeEfgGhHonsSxX%]))";
 	
@@ -179,14 +182,14 @@ public abstract class FormatASM implements Opcodes
 		return specs;
 	}
 
-	public static String showme( List<Spec> specs, Object... args )
-	{
-		StringBuilder sb = new StringBuilder();
-		for( Spec spec : specs ) {
-			System.out.println( spec.value );
-		}
-		return sb.toString();
-	}
+//	public static String showme( List<Spec> specs, Object... args )
+//	{
+//		StringBuilder sb = new StringBuilder();
+//		for( Spec spec : specs ) {
+//			System.out.println( spec.value );
+//		}
+//		return sb.toString();
+//	}
 	
 	public static void conv( Spec spec, String conv )
 	{
@@ -259,7 +262,7 @@ public abstract class FormatASM implements Opcodes
 		}
 	}
 
-	public static byte[] dump( String klazz, String subklazz, List<Spec> specs ) 
+	public static byte[] generateBytes( String klazz, String subklazz, List<Spec> specs ) 
 	{
 		klazz = klazz.replace( '.', '/' );
 		subklazz = subklazz.replace( '.', '/' );
@@ -297,11 +300,11 @@ public abstract class FormatASM implements Opcodes
 				{
 					case CONTENT:
 						copyTemplateASM( klazz, mv, spec.begin, spec.end );
-						break;
+						// Skip further processing
+						continue;
 						
 					case INT:
 						formatIntegerASM( mv, spec );
-						appendTextASM( mv );
 						break;
 						
 					case BOOL:
@@ -311,18 +314,6 @@ public abstract class FormatASM implements Opcodes
 						mv.visitInsn( AALOAD );
 						mv.visitMethodInsn( INVOKEVIRTUAL, "java/lang/Object", "toString", "()Ljava/lang/String;" );
 						mv.visitVarInsn( ASTORE, 3 );
-						
-						if( spec.width > 0 )
-						{
-							addWidth( mv, spec );
-						}
-						
-						if( spec.upper )
-						{
-							toUpperCase( mv );
-						}
-						
-						appendTextASM( mv );
 						break;
 						
 					case STRING:
@@ -332,18 +323,27 @@ public abstract class FormatASM implements Opcodes
 						mv.visitInsn( AALOAD );
 						mv.visitTypeInsn( CHECKCAST, "java/lang/String" );
 						mv.visitVarInsn( ASTORE, 3 );
-						if( spec.upper )
-						{
-							toUpperCase( mv );
-						}
-
-						
-						appendTextASM( mv );
-						
 						break;
 
 					default:
 						break;
+				}
+				
+				if( spec.upper )
+				{
+					toUpperCaseASM( mv );
+				}
+				
+				if( spec.width > 0 && !spec.leftFlag )
+				{
+					addWidthASM( mv, spec );
+				}
+				
+				appendTextASM( mv );
+
+				if( spec.width > 0 && spec.leftFlag )
+				{
+					addWidthASM( mv, spec );
 				}
 			}
 
@@ -399,14 +399,14 @@ public abstract class FormatASM implements Opcodes
 	}
 	
 	// text = text.toUpperCase();
-	public static void toUpperCase( MethodVisitor mv )
+	public static void toUpperCaseASM( MethodVisitor mv )
 	{
 		mv.visitVarInsn( ALOAD, 3 );
 		mv.visitMethodInsn( INVOKEVIRTUAL, "java/lang/String", "toUpperCase", "()Ljava/lang/String;" );
 		mv.visitVarInsn( ASTORE, 3 );
 	}
 	
-	public static void addWidth( MethodVisitor mv, Spec spec )
+	public static void addWidthASM( MethodVisitor mv, Spec spec )
 	{
 		mv.visitVarInsn( ALOAD, 2 );
 		mv.visitIntInsn( BIPUSH, spec.width );
@@ -467,17 +467,6 @@ public abstract class FormatASM implements Opcodes
 			sb.append( ' ' );
 		}
 	}
-
-	// format
-	public static void formatBooleanASM( )
-	{
-	}
-	
-//	public static String formatBoolean( Boolean b )
-//	{
-//		return b.toString();
-//	}
-	
 
 	protected String template;
 	

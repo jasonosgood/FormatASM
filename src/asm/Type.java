@@ -1,4 +1,16 @@
 package asm;
+
+
+/**
+ * Copyright 2015 Jason Aaron Osgood 
+ * 
+ * All rights reserved.
+ * 
+ * I'll pick a friendly open source license shortly. Probably BSD.
+ * 
+ **/
+
+
 enum Type
 {
 	BOOL,

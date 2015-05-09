@@ -1,5 +1,15 @@
 package asm;
 
+
+/**
+ * Copyright 2015 Jason Aaron Osgood 
+ * 
+ * All rights reserved.
+ * 
+ * I'll pick a friendly open source license shortly. Probably BSD.
+ * 
+ **/
+
 public class PrototypeFormatASM extends FormatASM
 {
 
@@ -8,19 +18,6 @@ public class PrototypeFormatASM extends FormatASM
 		
 		PrototypeFormatASM exec = new PrototypeFormatASM();
 		exec.template = "%d|%s|%8B|\n";
-//		exec.specs = new Spec[] { new Spec(), new Spec(), new Spec(), new Spec(), new Spec() };
-//		exec.specs[0].index = 0;
-//		exec.specs[0].type = Type.INT;
-//		exec.specs[1].index = -1;
-//		exec.specs[1].type = Type.CONTENT;
-//		exec.specs[2].index = 1;
-//		exec.specs[2].type = Type.STRING;
-//		exec.specs[3].index = -1;
-//		exec.specs[3].type = Type.CONTENT;
-//		exec.specs[4].index = 2;
-//		exec.specs[4].type = Type.BOOL;
-		
-//		exec.template = "---";
 
 		Object[] many = new Object[] { 1234, "xyzzy", false };
 		String result = exec.format( many );
@@ -30,6 +27,11 @@ public class PrototypeFormatASM extends FormatASM
 		System.out.printf( exec.template, many );
 		
 	}
+	
+	/**
+	 * This implementation is used to determine how the generated code should look. Get this to work as desired,
+	 * then use ASMify plugin to infer the code to generate this code.
+	 **/
 	
 	public String format( Object... args )
 	{
