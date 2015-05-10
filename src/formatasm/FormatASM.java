@@ -90,7 +90,6 @@ public abstract class FormatASM implements Opcodes
 //			{
 //				System.out.printf( "group %d value %s\n", n, m.group( n ));
 //			}
-			if( "%%".equals( whole )) continue;
 
 			if( m.start() > i ) 
 			{
@@ -99,8 +98,17 @@ public abstract class FormatASM implements Opcodes
 				specs.add( spec );
 			}
 			
-			Spec spec = new Spec();
+			// Remember for next iteration
+			i = m.end();
 
+			Spec spec = new Spec();
+			specs.add( spec );
+
+			if( "%%".equals( whole ))
+			{
+				spec.type = Type.PERCENT;
+				continue;
+			}				
 
 			String index = m.group( 1 );
 			String flags = m.group( 2 );
@@ -163,11 +171,7 @@ public abstract class FormatASM implements Opcodes
 				conv( spec, conv );
 			}
 
-			specs.add( spec );
 			prev = spec;
-			
-			
-			i = m.end();
 
 		}
 		
@@ -256,7 +260,7 @@ public abstract class FormatASM implements Opcodes
 			case 'x':
 				spec.type = Type.INT_HEX;
 				break;
-				
+
 			default:
 				break;
 		}
@@ -324,6 +328,13 @@ public abstract class FormatASM implements Opcodes
 						mv.visitTypeInsn( CHECKCAST, "java/lang/String" );
 						mv.visitVarInsn( ASTORE, 3 );
 						break;
+						
+					case PERCENT:
+						mv.visitVarInsn( ALOAD, 2 );
+						mv.visitIntInsn( BIPUSH, 37 );
+						mv.visitMethodInsn( INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;" );
+						mv.visitInsn( POP );
+						break;
 
 					default:
 						break;
@@ -385,7 +396,7 @@ public abstract class FormatASM implements Opcodes
 		mv.visitInsn( spec.groupFlag ? ICONST_1 : ICONST_0 );
 		mv.visitInsn( spec.plusFlag ? ICONST_1 : ICONST_0 );
 		mv.visitInsn( spec.spaceFlag ? ICONST_1 : ICONST_0 );
-		mv.visitMethodInsn( INVOKESTATIC, "asm/FormatASM", "formatInteger", "(Ljava/lang/Integer;ZZZZ)Ljava/lang/String;" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatInteger", "(Ljava/lang/Integer;ZZZZ)Ljava/lang/String;" );
 		mv.visitVarInsn( ASTORE, 3 );
 	}
 	
@@ -411,7 +422,7 @@ public abstract class FormatASM implements Opcodes
 		mv.visitVarInsn( ALOAD, 2 );
 		mv.visitIntInsn( BIPUSH, spec.width );
 		mv.visitVarInsn( ALOAD, 3 );
-		mv.visitMethodInsn(INVOKESTATIC, "asm/PrototypeFormatASM", "addWidth", "(Ljava/lang/StringBuilder;ILjava/lang/String;)V" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "addWidth", "(Ljava/lang/StringBuilder;ILjava/lang/String;)V" );
 	}
 	
 	// Convert integer to String, right-to-left

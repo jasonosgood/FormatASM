@@ -27,6 +27,9 @@ enum Type
 	SCIENTIFIC,
 	STRING,
 	
+	// %%
+	PERCENT,
+	
 	// Original content of printf template
 	CONTENT;
 }

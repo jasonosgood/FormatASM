@@ -38,6 +38,7 @@ public class PrototypeFormatASM extends FormatASM
 		StringBuilder sb = new StringBuilder();
 		
 		String text;
+		sb.append( '%' );
 		text = formatInteger( (Integer) args[0], false, false, false, false ); 
 		sb.append( text );
 		
