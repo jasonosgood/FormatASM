@@ -320,7 +320,11 @@ public abstract class FormatASM implements Opcodes
 						break;
 						
 					case INT_HEX:
-						formatIntegerASM( mv, spec );
+						formatHexidecimalASM( mv, spec );
+						break;
+						
+					case OCTAL:
+						formatOctalASM( mv, spec );
 						break;
 						
 					case BOOL:
@@ -393,7 +397,6 @@ public abstract class FormatASM implements Opcodes
 	// text = formatInteger( (Integer) args[0], false, false, false, false );
 	public static void formatIntegerASM( MethodVisitor mv, Spec spec ) 
 	{
-//		mv.visitVarInsn( ALOAD, 2 );
 		mv.visitVarInsn( ALOAD, 1 );
 		mv.visitIntInsn( BIPUSH, spec.index );
 		mv.visitInsn( AALOAD );
@@ -403,6 +406,28 @@ public abstract class FormatASM implements Opcodes
 		mv.visitInsn( spec.plusFlag ? ICONST_1 : ICONST_0 );
 		mv.visitInsn( spec.spaceFlag ? ICONST_1 : ICONST_0 );
 		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatInteger", "(Ljava/lang/Integer;ZZZZ)Ljava/lang/String;" );
+		mv.visitVarInsn( ASTORE, 3 );
+	}
+	
+	// text = formatHexidecimal( (Integer) args[0] );
+	public static void formatHexidecimalASM( MethodVisitor mv, Spec spec ) 
+	{
+		mv.visitVarInsn( ALOAD, 1 );
+		mv.visitIntInsn( BIPUSH, spec.index );
+		mv.visitInsn( AALOAD );
+		mv.visitTypeInsn( CHECKCAST, "java/lang/Integer" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatHexidecimal", "(Ljava/lang/Integer;)Ljava/lang/String;" );
+		mv.visitVarInsn( ASTORE, 3 );
+	}
+	
+	// text = formatOctal( (Integer) args[0] );
+	public static void formatOctalASM( MethodVisitor mv, Spec spec ) 
+	{
+		mv.visitVarInsn( ALOAD, 1 );
+		mv.visitIntInsn( BIPUSH, spec.index );
+		mv.visitInsn( AALOAD );
+		mv.visitTypeInsn( CHECKCAST, "java/lang/Integer" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatOctal", "(Ljava/lang/Integer;)Ljava/lang/String;" );
 		mv.visitVarInsn( ASTORE, 3 );
 	}
 	
@@ -476,6 +501,16 @@ public abstract class FormatASM implements Opcodes
 		String result = new String( buf, x + 1, 31 - x );
 		return result;
 	}
+	
+	public static String formatHexidecimal( Integer i )
+	{
+		return Integer.toHexString( i );
+	}		
+	
+	public static String formatOctal( Integer i )
+	{
+		return Integer.toOctalString( i );
+	}		
 	
 	public static void addWidth( StringBuilder sb, int width, String text )
 	{
