@@ -307,7 +307,19 @@ public abstract class FormatASM implements Opcodes
 						// Skip further processing
 						continue;
 						
+					case PERCENT:
+						mv.visitVarInsn( ALOAD, 2 );
+						mv.visitIntInsn( BIPUSH, '%' );
+						mv.visitMethodInsn( INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;" );
+						mv.visitInsn( POP );
+						// Skip further processing
+						continue;
+
 					case INT:
+						formatIntegerASM( mv, spec );
+						break;
+						
+					case INT_HEX:
 						formatIntegerASM( mv, spec );
 						break;
 						
@@ -329,13 +341,6 @@ public abstract class FormatASM implements Opcodes
 						mv.visitVarInsn( ASTORE, 3 );
 						break;
 						
-					case PERCENT:
-						mv.visitVarInsn( ALOAD, 2 );
-						mv.visitIntInsn( BIPUSH, 37 );
-						mv.visitMethodInsn( INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;" );
-						mv.visitInsn( POP );
-						break;
-
 					default:
 						break;
 				}
