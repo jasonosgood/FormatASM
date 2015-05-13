@@ -17,9 +17,9 @@ public class PrototypeFormatASM extends FormatASM
 	{
 		
 		PrototypeFormatASM exec = new PrototypeFormatASM();
-		exec.template = "%d|%s|%8B|\n";
+		exec.template = "%d|%c|%8B|\n";
 
-		Object[] many = new Object[] { 1234, "xyzzy", false };
+		Object[] many = new Object[] { 1234, 'z', false };
 		String result = exec.format( many );
 		
 		System.out.print( result );
@@ -38,14 +38,20 @@ public class PrototypeFormatASM extends FormatASM
 		StringBuilder sb = new StringBuilder();
 		
 		String text;
-		sb.append( '%' );
+//		Character c;
+//		sb.append( '%' );
 		text = formatInteger( (Integer) args[0], false, false, false, false ); 
 		sb.append( text );
 		
 		sb.append( template.substring( 2, 3 ));
 		
-		text = (String) args[1];
+//		text = (String) args[1];
+//		sb.append( text );
+
+		text = args[1].toString();
+		text = text.toUpperCase();
 		sb.append( text );
+		
 		
 		sb.append( template.substring( 5, 6 ));
 		

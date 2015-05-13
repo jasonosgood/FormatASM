@@ -324,6 +324,7 @@ public abstract class FormatASM implements Opcodes
 						break;
 						
 					case BOOL:
+					case CHAR:
 						// text = args[?].toString();
 						mv.visitVarInsn( ALOAD, 1 );
 						mv.visitIntInsn( BIPUSH, spec.index );

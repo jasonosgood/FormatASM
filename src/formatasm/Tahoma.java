@@ -17,8 +17,8 @@ public class Tahoma
 	public static void main( String[] args )
 		throws Exception
 	{
-		String input = "ma%%ke a wish '%d' '%-8S' wonderbar ! '%d' '%,d' '%(d' '%8B' ###\n";
-		Object[] blah = { 1234, "abc", -10, 2000, -30, false };
+		String input = "ma%%ke a wish '%d' '%-8S' wonderbar ! '%d' '%,d' '%(d' '%8B' '%c' ###\n";
+		Object[] blah = { 1234, "abc", -10, 2000, -30, false, 'Z' };
 		
 		String first = FormatASM.printf( input, blah );
 		System.out.print( first );
