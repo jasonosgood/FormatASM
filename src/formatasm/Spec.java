@@ -14,16 +14,17 @@ class Spec
 {
 	Spec() {}
 	
-	Spec( int begin, int end, String text )
+	Spec( int begin, int end, String value )
 	{
 		this.begin = begin;
 		this.end = end;
 		type = Type.CONTENT;
-		value = text;
+		this.value = value;
 	}
 	
 	int index = -1;
 	
+	// For debugging during code generation only
 	Object value;
 	
 	// Used for content

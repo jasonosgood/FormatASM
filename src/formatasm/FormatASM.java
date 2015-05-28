@@ -90,7 +90,6 @@ public abstract class FormatASM implements Opcodes
 //			{
 //				System.out.printf( "group %d value %s\n", n, m.group( n ));
 //			}
-			if( "%%".equals( whole )) continue;
 
 			if( m.start() > i ) 
 			{
@@ -99,8 +98,17 @@ public abstract class FormatASM implements Opcodes
 				specs.add( spec );
 			}
 			
-			Spec spec = new Spec();
+			// Remember for next iteration
+			i = m.end();
 
+			Spec spec = new Spec();
+			specs.add( spec );
+
+			if( "%%".equals( whole ))
+			{
+				spec.type = Type.PERCENT;
+				continue;
+			}				
 
 			String index = m.group( 1 );
 			String flags = m.group( 2 );
@@ -163,11 +171,7 @@ public abstract class FormatASM implements Opcodes
 				conv( spec, conv );
 			}
 
-			specs.add( spec );
 			prev = spec;
-			
-			
-			i = m.end();
 
 		}
 		
@@ -256,7 +260,7 @@ public abstract class FormatASM implements Opcodes
 			case 'x':
 				spec.type = Type.INT_HEX;
 				break;
-				
+
 			default:
 				break;
 		}
@@ -303,11 +307,28 @@ public abstract class FormatASM implements Opcodes
 						// Skip further processing
 						continue;
 						
+					case PERCENT:
+						mv.visitVarInsn( ALOAD, 2 );
+						mv.visitIntInsn( BIPUSH, '%' );
+						mv.visitMethodInsn( INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;" );
+						mv.visitInsn( POP );
+						// Skip further processing
+						continue;
+
 					case INT:
 						formatIntegerASM( mv, spec );
 						break;
 						
+					case INT_HEX:
+						formatHexidecimalASM( mv, spec );
+						break;
+						
+					case OCTAL:
+						formatOctalASM( mv, spec );
+						break;
+						
 					case BOOL:
+					case CHAR:
 						// text = args[?].toString();
 						mv.visitVarInsn( ALOAD, 1 );
 						mv.visitIntInsn( BIPUSH, spec.index );
@@ -324,7 +345,7 @@ public abstract class FormatASM implements Opcodes
 						mv.visitTypeInsn( CHECKCAST, "java/lang/String" );
 						mv.visitVarInsn( ASTORE, 3 );
 						break;
-
+						
 					default:
 						break;
 				}
@@ -376,7 +397,6 @@ public abstract class FormatASM implements Opcodes
 	// text = formatInteger( (Integer) args[0], false, false, false, false );
 	public static void formatIntegerASM( MethodVisitor mv, Spec spec ) 
 	{
-//		mv.visitVarInsn( ALOAD, 2 );
 		mv.visitVarInsn( ALOAD, 1 );
 		mv.visitIntInsn( BIPUSH, spec.index );
 		mv.visitInsn( AALOAD );
@@ -385,7 +405,29 @@ public abstract class FormatASM implements Opcodes
 		mv.visitInsn( spec.groupFlag ? ICONST_1 : ICONST_0 );
 		mv.visitInsn( spec.plusFlag ? ICONST_1 : ICONST_0 );
 		mv.visitInsn( spec.spaceFlag ? ICONST_1 : ICONST_0 );
-		mv.visitMethodInsn( INVOKESTATIC, "asm/FormatASM", "formatInteger", "(Ljava/lang/Integer;ZZZZ)Ljava/lang/String;" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatInteger", "(Ljava/lang/Integer;ZZZZ)Ljava/lang/String;" );
+		mv.visitVarInsn( ASTORE, 3 );
+	}
+	
+	// text = formatHexidecimal( (Integer) args[0] );
+	public static void formatHexidecimalASM( MethodVisitor mv, Spec spec ) 
+	{
+		mv.visitVarInsn( ALOAD, 1 );
+		mv.visitIntInsn( BIPUSH, spec.index );
+		mv.visitInsn( AALOAD );
+		mv.visitTypeInsn( CHECKCAST, "java/lang/Integer" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatHexidecimal", "(Ljava/lang/Integer;)Ljava/lang/String;" );
+		mv.visitVarInsn( ASTORE, 3 );
+	}
+	
+	// text = formatOctal( (Integer) args[0] );
+	public static void formatOctalASM( MethodVisitor mv, Spec spec ) 
+	{
+		mv.visitVarInsn( ALOAD, 1 );
+		mv.visitIntInsn( BIPUSH, spec.index );
+		mv.visitInsn( AALOAD );
+		mv.visitTypeInsn( CHECKCAST, "java/lang/Integer" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatOctal", "(Ljava/lang/Integer;)Ljava/lang/String;" );
 		mv.visitVarInsn( ASTORE, 3 );
 	}
 	
@@ -411,7 +453,7 @@ public abstract class FormatASM implements Opcodes
 		mv.visitVarInsn( ALOAD, 2 );
 		mv.visitIntInsn( BIPUSH, spec.width );
 		mv.visitVarInsn( ALOAD, 3 );
-		mv.visitMethodInsn(INVOKESTATIC, "asm/PrototypeFormatASM", "addWidth", "(Ljava/lang/StringBuilder;ILjava/lang/String;)V" );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "addWidth", "(Ljava/lang/StringBuilder;ILjava/lang/String;)V" );
 	}
 	
 	// Convert integer to String, right-to-left
@@ -459,6 +501,16 @@ public abstract class FormatASM implements Opcodes
 		String result = new String( buf, x + 1, 31 - x );
 		return result;
 	}
+	
+	public static String formatHexidecimal( Integer i )
+	{
+		return Integer.toHexString( i );
+	}		
+	
+	public static String formatOctal( Integer i )
+	{
+		return Integer.toOctalString( i );
+	}		
 	
 	public static void addWidth( StringBuilder sb, int width, String text )
 	{
