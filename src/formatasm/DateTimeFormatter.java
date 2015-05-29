@@ -8,14 +8,21 @@ public class DateTimeFormatter
 
 	public static void main( String[] args )
 	{
-//		Date now = new Date();
-		long now = System.currentTimeMillis();
-//		String now = "123";
-		System.out.printf( "%tr\n", now );
-		DateTimeFormatter dtf = new DateTimeFormatter();
-		String msg = dtf.formatDateTime( now, false, 'r' );
+		{
+			StringBuilder sb = new StringBuilder();
+			zeroPad( sb, 1000, 4 );
 
-		System.out.println( msg );
+			System.out.println( sb  );
+		}
+
+////		Date now = new Date();
+//		long now = System.currentTimeMillis();
+////		String now = "123";
+//		System.out.printf( "%tr\n", now );
+//		DateTimeFormatter dtf = new DateTimeFormatter();
+//		String msg = dtf.formatDateTime( now, false, 'r' );
+//
+//		System.out.println( msg );
 
 	}
 
@@ -57,14 +64,15 @@ public class DateTimeFormatter
 			case 'H': // hours 00 - 23
 			{
 				int i = t.get( Calendar.HOUR_OF_DAY );
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
 			case 'k': // hours 0 - 23
 			{
 				int i = t.get( Calendar.HOUR_OF_DAY );
-				zeroPad( sb, i, 0 );
+				sb.append( i );
 				break;
 			}
 
@@ -72,7 +80,8 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.HOUR );
 				if( i == 0 ) i = 12;
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
@@ -80,14 +89,15 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.HOUR );
 				if( i == 0 ) i = 12;
-				zeroPad( sb, i, 0 );
+				sb.append( i );
 				break;
 			}
 
 			case 'M': // minutes 00 - 59
 			{
 				int i = t.get( Calendar.MINUTE );
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
@@ -101,7 +111,7 @@ public class DateTimeFormatter
 			case 'L': // millis 000 - 999
 			{
 				int i = t.get( Calendar.MILLISECOND );
-				zeroPad( sb, i, 2 );
+				zeroPad( sb, i, 3 );
 				break;
 			}
 
@@ -115,7 +125,7 @@ public class DateTimeFormatter
 			case 'p': // Ante or post meridian (am or pm)
 			{
 				int i = t.get( Calendar.AM_PM );
-				String ampm = DateFormatSymbols.getInstance().getAmPmStrings()[i];
+				String ampm = DateFormatSymbols.getInstance( l ).getAmPmStrings()[i];
 				ampm = upper ? ampm.toUpperCase( l ) : ampm.toLowerCase( l );
 				sb.append( ampm );
 				break;
@@ -131,7 +141,8 @@ public class DateTimeFormatter
 			case 'S': // seconds 00 - 59 (60 = leap second)
 			{
 				int i = t.get( Calendar.SECOND );
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
@@ -148,10 +159,16 @@ public class DateTimeFormatter
 					sb.append( '+' );
 				}
 
-				// Convert from millis to hours and minutes "HHMM"
-				int min = i / 60000;
-				int offset = ( min / 60 ) * 100 + ( min % 60 );
-				zeroPad( sb, offset, 4 );
+
+				int minutes = i / 60000;
+				int hours = minutes / 60;
+				minutes = minutes % 60;
+
+				sb.append( (char) ( '0' + hours / 10));
+				sb.append( (char) ( '0' + hours % 10 ));
+				sb.append( (char) ( '0' + minutes / 10 ));
+				sb.append( (char) ( '0' + minutes % 10 ));
+
 				break;
 			}
 
@@ -159,7 +176,7 @@ public class DateTimeFormatter
 			{
 				TimeZone tz = t.getTimeZone();
 				boolean daylight = t.get( Calendar.DST_OFFSET ) != 0;
-				String name = tz.getDisplayName( daylight, TimeZone.SHORT );
+				String name = tz.getDisplayName( daylight, TimeZone.SHORT, l );
 				name = upper ? name.toUpperCase( l ) : name;
 				sb.append( name );
 				break;
@@ -168,7 +185,7 @@ public class DateTimeFormatter
 			case 'a': // Day of week, short name
 			{
 				int i = t.get( Calendar.DAY_OF_WEEK );
-				String day = DateFormatSymbols.getInstance().getShortWeekdays()[i];
+				String day = DateFormatSymbols.getInstance( l ).getShortWeekdays()[i];
 				day = upper ? day.toUpperCase( l ) : day;
 				sb.append( day );
 				break;
@@ -177,7 +194,7 @@ public class DateTimeFormatter
 			case 'A': // Day of week
 			{
 				int i = t.get( Calendar.DAY_OF_WEEK );
-				String day = DateFormatSymbols.getInstance().getWeekdays()[i];
+				String day = DateFormatSymbols.getInstance( l ).getWeekdays()[i];
 				day = upper ? day.toUpperCase( l ) : day;
 				sb.append( day );
 				break;
@@ -186,7 +203,7 @@ public class DateTimeFormatter
 			case 'B':
 			{
 				int i = t.get( Calendar.MONTH );
-				String month = DateFormatSymbols.getInstance().getMonths()[i];
+				String month = DateFormatSymbols.getInstance( l ).getMonths()[i];
 				month = upper ? month.toUpperCase( l ) : month;
 				sb.append( month );
 				break;
@@ -196,7 +213,7 @@ public class DateTimeFormatter
 			case 'h':
 			{
 				int i = t.get( Calendar.MONTH );
-				String month = DateFormatSymbols.getInstance().getShortMonths()[i];
+				String month = DateFormatSymbols.getInstance( l ).getShortMonths()[i];
 				month = upper ? month.toUpperCase( l ) : month;
 				sb.append( month );
 				break;
@@ -206,7 +223,8 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.YEAR );
 				i /= 100;
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
@@ -214,7 +232,8 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.YEAR );
 				i %= 100;
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
@@ -228,14 +247,15 @@ public class DateTimeFormatter
 			case 'd': // Day of month 01 - 31
 			{
 				int i = t.get( Calendar.DATE );
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
 			case 'e': // Day of month 1 - 31
 			{
 				int i = t.get( Calendar.DATE );
-				zeroPad( sb, i, 0 );
+				sb.append( i );
 				break;
 			}
 
@@ -249,7 +269,8 @@ public class DateTimeFormatter
 			case 'm': // month 00 - 12
 			{
 				int i = t.get( Calendar.MONTH ) + 1;
-				zeroPad( sb, i, 2 );
+				sb.append( (char) ( '0' + i / 10 ));
+				sb.append( (char) ( '0' + i % 10 ));
 				break;
 			}
 
@@ -324,28 +345,23 @@ public class DateTimeFormatter
 		}
 	}
 
-	// Assumes non-negative value. Used to format simple datetime integers.
+	// Format simple datetime integers. Assumes non-negative value.
 	public static void zeroPad( StringBuilder sb, int i, int width )
 	{
-		char[] buf = new char[32];
-		int x = 31;
-
-		int limit = x - width;
+		char[] buf = new char[width];
 		do
 		{
-			buf[x] = (char)( '0' + ( i % 10 )  );
-			x--;
+			buf[--width] = (char)( '0' + i % 10 );
 			i = i / 10;
 
 		} while( i > 0 );
 
-		while( x > limit )
+		while( width > 0 )
 		{
-			buf[x] = (char) '0';
-			x--;
+			buf[--width] = '0';
 		}
 
-		sb.append( buf, x + 1, 31 - x );
+		sb.append( buf );
 	}
 
 
