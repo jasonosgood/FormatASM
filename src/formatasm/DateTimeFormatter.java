@@ -2,16 +2,37 @@ package formatasm;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
 public class DateTimeFormatter
 {
 
+	public static void main( String[] args )
+	{
+		Date now = new Date();
+		System.out.printf( "%tc\n", now );
+		DateTimeFormatter dtf = new DateTimeFormatter();
+		String msg = dtf.print( now, 'c' );
+
+		System.out.println( msg );
+
+	}
 
 
 
-	private void print( StringBuilder sb, Calendar t, char c, Locale l )
+	public String print( Date date, char c )
+	{
+		Locale l = Locale.getDefault();
+		Calendar t = Calendar.getInstance( l );
+		t.setTime( date );
+		StringBuilder sb = new StringBuilder();
+		print( sb, t, c, l );
+		return sb.toString();
+	}
+
+	public void print( StringBuilder sb, Calendar t, char c, Locale l )
 	{
 		if( sb == null ) sb = new StringBuilder();
 		switch( c )
