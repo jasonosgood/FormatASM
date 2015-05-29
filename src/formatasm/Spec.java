@@ -32,14 +32,14 @@ class Spec
 	int end;
 
 	Type type;
-	
+	char datetime;
+
 	int width;
 	int precision;
-	boolean datetime;
-	
+
 	boolean upper;
 	boolean leftFlag;
-	boolean altFlag;
+//	boolean altFlag;
 	boolean plusFlag;
 	boolean spaceFlag;
 	boolean zeroFlag;

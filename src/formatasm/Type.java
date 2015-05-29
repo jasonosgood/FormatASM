@@ -22,14 +22,9 @@ enum Type
 	HASHCODE,
 	INT,
 	INT_HEX,
-	LINE_SEP,
 	OCTAL,
 	SCIENTIFIC,
 	STRING,
-	
-	// %%
-	PERCENT,
-	
-	// Original content of printf template
-	CONTENT;
+	PERCENT, // %%
+	CONTENT; // Original content of printf template
 }

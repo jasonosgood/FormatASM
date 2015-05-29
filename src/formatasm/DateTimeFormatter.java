@@ -1,20 +1,19 @@
 package formatasm;
 
 import java.text.DateFormatSymbols;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 public class DateTimeFormatter
 {
 
 	public static void main( String[] args )
 	{
-		Date now = new Date();
-		System.out.printf( "%tc\n", now );
+//		Date now = new Date();
+		long now = System.currentTimeMillis();
+//		String now = "123";
+		System.out.printf( "%tr\n", now );
 		DateTimeFormatter dtf = new DateTimeFormatter();
-		String msg = dtf.print( now, 'c' );
+		String msg = dtf.formatDateTime( now, false, 'r' );
 
 		System.out.println( msg );
 
@@ -22,17 +21,35 @@ public class DateTimeFormatter
 
 
 
-	public String print( Date date, char c )
+	public static String formatDateTime( Object value, boolean upper, char c )
 	{
 		Locale l = Locale.getDefault();
-		Calendar t = Calendar.getInstance( l );
-		t.setTime( date );
+		Calendar t = null;
+		if( value instanceof Calendar )
+		{
+			t = (Calendar) value;
+		}
+		else if( value instanceof Date )
+		{
+			t = Calendar.getInstance( l );
+			t.setTime( (Date) value );
+		}
+		else if( value instanceof Long )
+		{
+			t = Calendar.getInstance( l );
+			t.setTimeInMillis( (Long) value );
+		}
+		else
+		{
+			throw new IllegalFormatConversionException( c, value.getClass() );
+		}
+
 		StringBuilder sb = new StringBuilder();
-		print( sb, t, c, l );
+		formatDateTime( t, c, upper, l, sb );
 		return sb.toString();
 	}
 
-	public void print( StringBuilder sb, Calendar t, char c, Locale l )
+	public static void formatDateTime( Calendar t, char c, boolean upper, Locale l, StringBuilder sb )
 	{
 		if( sb == null ) sb = new StringBuilder();
 		switch( c )
@@ -99,7 +116,7 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.AM_PM );
 				String ampm = DateFormatSymbols.getInstance().getAmPmStrings()[i];
-				ampm = ampm.toLowerCase( l );
+				ampm = upper ? ampm.toUpperCase( l ) : ampm.toLowerCase( l );
 				sb.append( ampm );
 				break;
 			}
@@ -143,6 +160,7 @@ public class DateTimeFormatter
 				TimeZone tz = t.getTimeZone();
 				boolean daylight = t.get( Calendar.DST_OFFSET ) != 0;
 				String name = tz.getDisplayName( daylight, TimeZone.SHORT );
+				name = upper ? name.toUpperCase( l ) : name;
 				sb.append( name );
 				break;
 			}
@@ -151,6 +169,7 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.DAY_OF_WEEK );
 				String day = DateFormatSymbols.getInstance().getShortWeekdays()[i];
+				day = upper ? day.toUpperCase( l ) : day;
 				sb.append( day );
 				break;
 			}
@@ -159,6 +178,7 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.DAY_OF_WEEK );
 				String day = DateFormatSymbols.getInstance().getWeekdays()[i];
+				day = upper ? day.toUpperCase( l ) : day;
 				sb.append( day );
 				break;
 			}
@@ -167,6 +187,7 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.MONTH );
 				String month = DateFormatSymbols.getInstance().getMonths()[i];
+				month = upper ? month.toUpperCase( l ) : month;
 				sb.append( month );
 				break;
 			}
@@ -176,6 +197,7 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.MONTH );
 				String month = DateFormatSymbols.getInstance().getShortMonths()[i];
+				month = upper ? month.toUpperCase( l ) : month;
 				sb.append( month );
 				break;
 			}
@@ -233,68 +255,67 @@ public class DateTimeFormatter
 
 			case 'R': // 12 hour timestamp hh:mm, equiv to "%tH:%tM"
 			{
-				print( sb, t, 'H', l );
+				formatDateTime( t, 'H', upper, l, sb );
 				sb.append( ':' );
-				print( sb, t, 'M', l );
+				formatDateTime( t, 'M', upper, l, sb );
 				break;
 			}
 
 			case 'T': // 12 hour timestamp hh:mm:ss, equiv to "%tH:%tM:%tS"
 			{
-				print( sb, t, 'H', l );
+				formatDateTime( t, 'H', upper, l, sb );
 				sb.append( ':' );
-				print( sb, t, 'M', l );
+				formatDateTime( t, 'M', upper, l, sb );
 				sb.append( ':' );
-				print( sb, t, 'S', l );
+				formatDateTime( t, 'S', upper, l, sb );
 				break;
 			}
 
-			case 'r': // 12 hour timestamp hh:mm:ss [am|pm], equiv to "%tI %M %tS %tp"
+			case 'r': // 12 hour timestamp hh:mm:ss [am|pm], equiv to "%tI %M %tS %Tp"
 			{
-				print( sb, t, 'I', l );
+				formatDateTime( t, 'I', upper, l, sb );
+				sb.append( ':' );
+				formatDateTime( t, 'M', upper, l, sb );
+				sb.append( ':' );
+				formatDateTime( t, 'S', upper, l, sb );
 				sb.append( ' ' );
-				print( sb, t, 'M', l );
-				sb.append( ' ' );
-				print( sb, t, 'S', l );
-				sb.append( ' ' );
-				print( sb, t, 'p', l );
+				formatDateTime( t, 'p', true, l, sb );
 				break;
 			}
 			
 			case 'c': // Date and time, equiv to "%ta %tb %td %tT %tZ %tY", eg "Sun Jul 20 16:17:00 EDT 1969"
 			{
-				print( sb, t, 'a', l );
+				formatDateTime( t, 'a', upper, l, sb );
 				sb.append( ' ' );
-				print( sb, t, 'b', l );
+				formatDateTime( t, 'b', upper, l, sb );
 				sb.append( ' ' );
-				print( sb, t, 'd', l );
+				formatDateTime( t, 'd', upper, l, sb );
 				sb.append( ' ' );
-				print( sb, t, 'T', l );
+				formatDateTime( t, 'T', upper, l, sb );
 				sb.append( ' ' );
-				print( sb, t, 'Z', l );
+				formatDateTime( t, 'Z', upper, l, sb );
 				sb.append( ' ' );
-				print( sb, t, 'Y', l );
+				formatDateTime( t, 'Y', upper, l, sb );
 				break;
 			}
 
 			case 'D': //  date, equiv to "%tm/%td/%ty"
 			{
-				print( sb, t, 'm', l );
+				formatDateTime( t, 'm', upper, l, sb );
 				sb.append( '/' );
-				print( sb, t, 'd', l );
+				formatDateTime( t, 'd', upper, l, sb );
 				sb.append( '/' );
-				print( sb, t, 'y', l );
+				formatDateTime( t, 'y', upper, l, sb );
 				break;
 			}
 
 			case 'F': // ISO 8601 date, equiv to %tY-%tm-%td".
 			{
-				print( sb, t, 'Y', l );
+				formatDateTime( t, 'Y', upper, l, sb );
 				sb.append( '-' );
-				print( sb, t, 'm', l );
+				formatDateTime( t, 'm', upper, l, sb );
 				sb.append( '-' );
-				print( sb, t, 'd', l );
-				sb.append( '-' );
+				formatDateTime( t, 'd', upper, l, sb );
 				break;
 			}
 			
@@ -303,7 +324,7 @@ public class DateTimeFormatter
 		}
 	}
 
-	// Assumes non-negative value
+	// Assumes non-negative value. Used to format simple datetime integers.
 	public static void zeroPad( StringBuilder sb, int i, int width )
 	{
 		char[] buf = new char[32];

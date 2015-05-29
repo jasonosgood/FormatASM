@@ -19,7 +19,20 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public abstract class FormatASM implements Opcodes
+/**
+ * References:
+ *
+ * 	http://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html
+ * 	https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholders
+ *
+ */
+
+public abstract class
+	FormatASM
+extends
+	DateTimeFormatter
+implements
+	Opcodes
 {
 	public static String printf( String template, Object... args ) {
 		
@@ -64,17 +77,25 @@ public abstract class FormatASM implements Opcodes
 	public abstract String format( Object... args );
 
 	
-	// https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholders
-	// %[argument_index$][flags][width][.precision][t]conversion
-	private static final String	formatSpecifier	= "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?(([tT][aAbBcCdDeFhHIjklLmMnpQrsStyYZ])|([aAbBcCdeEfgGhHonsSxX%]))";
-	
-	private static Pattern fsPattern = Pattern.compile( formatSpecifier );
+	//
+	// %[argument_index$][flags][width][.precision][datetime|conversion]
+	//
+	// This regex attempts to balance correctness, concision, expression complexity, ease of
+	// value extraction.
+	//
+	// Regex's groups (for extraction):
+	//
+	// 0:whole ( 1:index 2:flags 3:width 4:precision 5: ( 6:datetime 7:conv ))
+
+	private static final String	formatSpecifier	= "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?(([tT][AaBbCcDdeFHhIjkLlMmNpQRrSsTYyZz])|([aAbBcCdeEfgGhHonsSxX%]))";
+
+	private static Pattern pattern = Pattern.compile( formatSpecifier );
 
 	public static List<Spec> parse( String input, Object... args )
 	{
 		ArrayList<Spec> specs = new ArrayList<Spec>();
 		
-		Matcher m = fsPattern.matcher( input );
+		Matcher m = pattern.matcher( input );
 		
 		int autoIndex = 0;
 		int i = 0;
@@ -98,7 +119,7 @@ public abstract class FormatASM implements Opcodes
 				specs.add( spec );
 			}
 			
-			// Remember for next iteration
+			// Remember varargs index for next iteration
 			i = m.end();
 
 			Spec spec = new Spec();
@@ -164,9 +185,15 @@ public abstract class FormatASM implements Opcodes
 			{
 				spec.precision = Integer.valueOf( precision );
 			}
-			
-			
-			if( conv != null )
+
+
+			if( datetime != null )
+			{
+				spec.type = Type.DATETIME;
+				spec.upper = datetime.charAt( 0 ) == 'T';
+				spec.datetime = datetime.charAt( 1 );
+			}
+			else if( conv != null )
 			{
 				conv( spec, conv );
 			}
@@ -276,8 +303,6 @@ public abstract class FormatASM implements Opcodes
 
 		cw.visit( V1_7, ACC_PUBLIC + ACC_SUPER, subklazz, null, klazz, null );
 
-		// cw.visitSource( "WishBoneXYZ.java", null );
-
 		{
 			mv = cw.visitMethod( ACC_PUBLIC, "<init>", "()V", null, null );
 			mv.visitCode();
@@ -345,12 +370,16 @@ public abstract class FormatASM implements Opcodes
 						mv.visitTypeInsn( CHECKCAST, "java/lang/String" );
 						mv.visitVarInsn( ASTORE, 3 );
 						break;
+
+					case DATETIME:
+						formatDateTimeASM( mv, spec );
+						break;
 						
 					default:
 						break;
 				}
 				
-				if( spec.upper )
+				if( spec.upper && spec.type != Type.DATETIME )
 				{
 					toUpperCaseASM( mv );
 				}
@@ -394,7 +423,7 @@ public abstract class FormatASM implements Opcodes
 		mv.visitInsn( POP );
 	}
 	
-	// text = formatInteger( (Integer) args[0], false, false, false, false );
+	// text = formatInteger( (Integer) args[?], false, false, false, false );
 	public static void formatIntegerASM( MethodVisitor mv, Spec spec ) 
 	{
 		mv.visitVarInsn( ALOAD, 1 );
@@ -408,7 +437,19 @@ public abstract class FormatASM implements Opcodes
 		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatInteger", "(Ljava/lang/Integer;ZZZZ)Ljava/lang/String;" );
 		mv.visitVarInsn( ASTORE, 3 );
 	}
-	
+
+	// text = formatDateTime( (Date) args[?], dateTimeChar );
+	public static void formatDateTimeASM( MethodVisitor mv, Spec spec )
+	{
+		mv.visitVarInsn( ALOAD, 1 );
+		mv.visitIntInsn( BIPUSH, spec.index );
+		mv.visitInsn( AALOAD );
+		mv.visitInsn( spec.upper ? ICONST_1 : ICONST_0 );
+		mv.visitIntInsn( BIPUSH, spec.datetime );
+		mv.visitMethodInsn( INVOKESTATIC, "formatasm/FormatASM", "formatDateTime", "(Ljava/lang/Object;ZC)Ljava/lang/String;" );
+		mv.visitVarInsn( ASTORE, 3 );
+	}
+
 	// text = formatHexidecimal( (Integer) args[0] );
 	public static void formatHexidecimalASM( MethodVisitor mv, Spec spec ) 
 	{
