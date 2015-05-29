@@ -19,8 +19,8 @@ public class TestDateTime
 	public static void main( String[] args )
 		throws Exception
 	{
-//		Date now = new Date();
-		Float now = 1.0f;
+		Date now = new Date();
+//		Float now = 1.0f;
 		for( char pre : "tT".toCharArray() )
 		{
 			for( char post : "AaBbCcDdeFHhIjkLlMmNpQRrSsTYyZz".toCharArray() )

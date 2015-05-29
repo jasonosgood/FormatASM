@@ -24,7 +24,7 @@ public class DateTimeFormatter
 	public static String formatDateTime( Object value, boolean upper, char c )
 	{
 		Locale l = Locale.getDefault();
-		Calendar t = null;
+		Calendar t;
 		if( value instanceof Calendar )
 		{
 			t = (Calendar) value;

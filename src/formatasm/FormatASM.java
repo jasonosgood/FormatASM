@@ -189,13 +189,11 @@ implements
 
 			if( datetime != null )
 			{
-				spec.type = Type.DATETIME;
-				spec.upper = datetime.charAt( 0 ) == 'T';
-				spec.datetime = datetime.charAt( 1 );
+				decode( spec, datetime );
 			}
 			else if( conv != null )
 			{
-				conv( spec, conv );
+				decode( spec, conv );
 			}
 
 			prev = spec;
@@ -222,7 +220,7 @@ implements
 //		return sb.toString();
 //	}
 	
-	public static void conv( Spec spec, String conv )
+	public static void decode( Spec spec, String conv )
 	{
 		char type = conv.charAt( 0 );
 				
@@ -286,6 +284,13 @@ implements
 				spec.upper = true;
 			case 'x':
 				spec.type = Type.INT_HEX;
+				break;
+
+			case 'T':
+				spec.upper = true;
+			case 't':
+				spec.type = Type.DATETIME;
+				spec.datetime = conv.charAt( 1 );
 				break;
 
 			default:
