@@ -85,7 +85,7 @@ implements
 	//
 	// Regex's groups (for extraction):
 	//
-	// 0:whole ( 1:index 2:flags 3:width 4:precision 5: ( 6:datetime 7:conv ))
+	// 0:whole ( 1:index 2:flags 3:width 4:precision 5:notused ( 6:datetime 7:conv ))
 
 	private static final String	formatSpecifier	= "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?(([tT][AaBbCcDdeFHhIjkLlMmNpQRrSsTYyZz])|([aAbBcCdeEfgGhHonsSxX%]))";
 

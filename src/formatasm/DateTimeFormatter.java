@@ -1,6 +1,7 @@
 package formatasm;
 
 import java.text.DateFormatSymbols;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 
 public class DateTimeFormatter
@@ -8,29 +9,34 @@ public class DateTimeFormatter
 
 	public static void main( String[] args )
 	{
-		{
-			StringBuilder sb = new StringBuilder();
-			zeroPad( sb, 1000, 4 );
-
-			System.out.println( sb  );
-		}
-
-////		Date now = new Date();
-//		long now = System.currentTimeMillis();
-////		String now = "123";
-//		System.out.printf( "%tr\n", now );
-//		DateTimeFormatter dtf = new DateTimeFormatter();
-//		String msg = dtf.formatDateTime( now, false, 'r' );
+//		{
+//			StringBuilder sb = new StringBuilder();
+//			zeroPad( sb, 1000, 4 );
 //
-//		System.out.println( msg );
+//			System.out.println( sb  );
+//		}
+
+//		Date now = new Date();
+		long now = System.currentTimeMillis();
+//		String now = "123";
+		System.out.printf( "%tr\n", now );
+		DateTimeFormatter dtf = new DateTimeFormatter();
+		String msg = dtf.formatDateTime( now, false, 'r' );
+
+		System.out.println( msg );
 
 	}
 
-
-
-	public static String formatDateTime( Object value, boolean upper, char c )
-	{
+	public static String formatDateTime( Object value, boolean upper, char c ) {
 		Locale l = Locale.getDefault();
+		return formatDateTime( value, upper, c, l );
+	}
+
+	static char zero;
+
+	public static String formatDateTime( Object value, boolean upper, char c, Locale l )
+	{
+		zero = DecimalFormatSymbols.getInstance( l ).getZeroDigit();
 		Calendar t;
 		if( value instanceof Calendar )
 		{
@@ -164,7 +170,7 @@ public class DateTimeFormatter
 				int hours = minutes / 60;
 				minutes = minutes % 60;
 
-				sb.append( (char) ( '0' + hours / 10));
+				sb.append( (char) ( '0' + hours / 10 ));
 				sb.append( (char) ( '0' + hours % 10 ));
 				sb.append( (char) ( '0' + minutes / 10 ));
 				sb.append( (char) ( '0' + minutes % 10 ));

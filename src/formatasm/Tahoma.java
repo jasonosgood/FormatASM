@@ -19,12 +19,12 @@ public class Tahoma
 	public static void main( String[] args )
 		throws Exception
 	{
-		String input = "%tr\n";
-		Object[] blah = { new Date() };
+//		String input = "%tr\n";
+//		Object[] blah = { new Date() };
 //		String input = "a float %f\n";
 //		Object[] blah = { 1.0 };
-//		String input = "ma%%ke a wish '%d' '%-8S' wonderbar ! '%d' '%,d' '%(d' '%8B' '%c' '%x' '%o' ###\n";
-//		Object[] blah = { 1234, "abc", -10, 2000, -30, false, 'Z', 0xAB, 0xAB };
+		String input = "ma%%ke a wish '%d' '%-8S' wonderbar ! '%d' '%,d' '%(d' '%8B' '%c' '%x' '%o' %tr ###\n";
+		Object[] blah = { 1234, "abc", -10, 2000, -30, false, 'Z', 0xAB, 0xAB, new Date() };
 
 		System.out.printf( input, blah );
 

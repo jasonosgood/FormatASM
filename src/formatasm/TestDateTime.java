@@ -2,6 +2,7 @@ package formatasm;
 
 
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Copyright 2015 Jason Aaron Osgood 
@@ -20,20 +21,27 @@ public class TestDateTime
 		throws Exception
 	{
 		Date now = new Date();
-//		Float now = 1.0f;
-		for( char pre : "tT".toCharArray() )
+		for( Locale l : Locale.getAvailableLocales() )
 		{
+//		Locale l = Locale.FRENCH;
+		// Upper and lower case
+		for( char pre : "Tt".toCharArray() )
+		{
+			// Every possible conversion
 			for( char post : "AaBbCcDdeFHhIjkLlMmNpQRrSsTYyZz".toCharArray() )
 			{
-				String pattern = "'%-16" + pre + post + "'";
+//				String pattern = "'%-16" + pre + post + "'";
+				String pattern = "%" + pre + post;
 				try
 				{
-					String a = String.format( pattern, now );
-					String b = FormatASM.printf( pattern, now );
+					String a = String.format( l, pattern, now );
+//					String b = FormatASM.printf( pattern, now );
+					boolean upper = pre == 'T';
+					String b = DateTimeFormatter.formatDateTime( now, upper, post, l );
 					boolean match = a.equals( b );
-					//				if( !match )
+					if( !match )
 					{
-						System.out.printf( "'%s' a: %s b: %s => %b \n", pattern, a, b, match );
+						System.out.printf( "locale: %s '%s' a: %s b: %s => %b \n", l.toString(), pattern, a, b, match );
 					}
 
 				}
@@ -46,6 +54,8 @@ public class TestDateTime
 				}
 			}
 		}
+		}
+
 
 	}
 
