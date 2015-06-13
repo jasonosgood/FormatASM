@@ -1,6 +1,9 @@
 package formatasm;
 
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * Copyright 2015 Jason Aaron Osgood 
  * 
@@ -15,7 +18,9 @@ public class PrototypeFormatASM extends FormatASM
 
 	public static void main( String[] args )
 	{
-		
+		BigInteger bi = new BigInteger( String.valueOf( 100L ) );
+		BigDecimal bd = new BigDecimal( 100.0 );
+
 		PrototypeFormatASM exec = new PrototypeFormatASM();
 		exec.template = "%d|%c|%8B|\n";
 

@@ -70,8 +70,7 @@ public class DateTimeFormatter
 			case 'H': // hours 00 - 23
 			{
 				int i = t.get( Calendar.HOUR_OF_DAY );
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
@@ -86,8 +85,7 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.HOUR );
 				if( i == 0 ) i = 12;
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
@@ -102,8 +100,7 @@ public class DateTimeFormatter
 			case 'M': // minutes 00 - 59
 			{
 				int i = t.get( Calendar.MINUTE );
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
@@ -117,7 +114,8 @@ public class DateTimeFormatter
 			case 'L': // millis 000 - 999
 			{
 				int i = t.get( Calendar.MILLISECOND );
-				zeroPad( sb, i, 3 );
+				zeroPadThree( sb, i );
+//				zeroPad( sb, i, 3 );
 				break;
 			}
 
@@ -147,8 +145,7 @@ public class DateTimeFormatter
 			case 'S': // seconds 00 - 59 (60 = leap second)
 			{
 				int i = t.get( Calendar.SECOND );
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
@@ -170,10 +167,8 @@ public class DateTimeFormatter
 				int hours = minutes / 60;
 				minutes = minutes % 60;
 
-				sb.append( (char) ( '0' + hours / 10 ));
-				sb.append( (char) ( '0' + hours % 10 ));
-				sb.append( (char) ( '0' + minutes / 10 ));
-				sb.append( (char) ( '0' + minutes % 10 ));
+				zeroPadTwo( sb, hours );
+				zeroPadTwo( sb, minutes );
 
 				break;
 			}
@@ -229,8 +224,7 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.YEAR );
 				i /= 100;
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
@@ -238,23 +232,21 @@ public class DateTimeFormatter
 			{
 				int i = t.get( Calendar.YEAR );
 				i %= 100;
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
 			case 'Y': // Year 0000 - 9999
 			{
 				int i = t.get( Calendar.YEAR );
-				zeroPad( sb, i, 4 );
+				zeroPadFour( sb, i );
 				break;
 			}
 
 			case 'd': // Day of month 01 - 31
 			{
 				int i = t.get( Calendar.DATE );
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
@@ -268,15 +260,14 @@ public class DateTimeFormatter
 			case 'j': // day of year 001 - 366
 			{
 				int i = t.get( Calendar.DAY_OF_YEAR );
-				zeroPad( sb, i, 3 );
+				zeroPadThree( sb, i );
 				break;
 			}
 
 			case 'm': // month 00 - 12
 			{
 				int i = t.get( Calendar.MONTH ) + 1;
-				sb.append( (char) ( '0' + i / 10 ));
-				sb.append( (char) ( '0' + i % 10 ));
+				zeroPadTwo( sb, i );
 				break;
 			}
 
@@ -349,6 +340,26 @@ public class DateTimeFormatter
 			default:
 				break;
 		}
+	}
+
+	public static void zeroPadTwo( StringBuilder sb, int i )
+	{
+		sb.append( (char) ( '0' + i / 10 ));
+		sb.append( (char) ( '0' + i % 10 ));
+	}
+
+	public static void zeroPadThree( StringBuilder sb, int i )
+	{
+		sb.append( (char) ( '0' + i / 100 ));
+		i %= 100;
+		zeroPadTwo( sb, i );
+	}
+
+	public static void zeroPadFour( StringBuilder sb, int i )
+	{
+		sb.append( (char) ( '0' + i / 1000 ));
+		i %= 1000;
+		zeroPadThree( sb, i );
 	}
 
 	// Format simple datetime integers. Assumes non-negative value.
