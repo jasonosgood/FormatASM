@@ -158,8 +158,7 @@ implements
 				{
 					switch( c ) {
 						case '-': spec.leftFlag = true; break;
-						// don't know what this does
-//							case '#': spec.altFlag = true; break;
+						case '#': spec.altFlag = true; break;
 						case '+': spec.plusFlag = true; break;
 						case ' ': spec.spaceFlag = true; break;
 						case '0': spec.zeroFlag = true; break;

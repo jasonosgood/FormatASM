@@ -39,7 +39,7 @@ class Spec
 
 	boolean upper;
 	boolean leftFlag;
-//	boolean altFlag;
+	boolean altFlag;
 	boolean plusFlag;
 	boolean spaceFlag;
 	boolean zeroFlag;
